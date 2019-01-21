@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	dbProtocolVar      = "DB_PROTOCOL"
 	dbHostVar          = "DB_HOST"
 	dbPortVar          = "DB_PORT"
 	sqlFilePathVar     = "SQL_FILE_PATH"
@@ -31,6 +32,11 @@ func main() {
 	validate := make([][]string, 0)
 
 	sqlFilePath := os.Getenv(sqlFilePathVar)
+
+	dbProtocol := os.Getenv(dbProtocolVar)
+	validate = append(validate, []string{
+		dbProtocol, dbProtocolVar,
+	})
 
 	dbHost := os.Getenv(dbHostVar)
 	validate = append(validate, []string{
@@ -83,7 +89,7 @@ func main() {
 		}
 	}
 
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@%s:%s/", dbUserName, dbUserPass, dbHost, dbPort))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@%s(%s:%s)/", dbUserName, dbUserPass, dbProtocol, dbHost, dbPort))
 	if err != nil {
 		log.Fatal("could not open connection to sql db")
 	}
