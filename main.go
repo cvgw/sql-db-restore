@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/cvgw/sql-db-restore/pkg/adapters/s3"
 	"github.com/cvgw/sql-db-restore/pkg/restore"
 )
 
@@ -19,12 +20,15 @@ const (
 )
 
 func main() {
+	var (
+		sqlFileS3Key    string
+		sqlFileS3Bucket string
+		iamProfile      string
+	)
+
 	validate := make([][]string, 0)
 
 	sqlFilePath := os.Getenv(sqlFilePathVar)
-	validate = append(validate, []string{
-		sqlFilePath, sqlFilePathVar,
-	})
 
 	dbUserName := os.Getenv(dbUserNameVar)
 	validate = append(validate, []string{
@@ -36,24 +40,34 @@ func main() {
 		dbUserPass, dbUserPassVar,
 	})
 
-	sqlFileS3Bucket := os.Getenv(sqlFileS3BucketVar)
-	validate = append(validate, []string{
-		sqlFileS3Bucket, sqlFileS3BucketVar,
-	})
+	if sqlFilePath == "" {
+		sqlFileS3Key = os.Getenv(sqlFileS3KeyVar)
+		validate = append(validate, []string{
+			sqlFileS3Key, sqlFileS3KeyVar,
+		})
 
-	sqlFileS3Key := os.Getenv(sqlFileS3KeyVar)
-	validate = append(validate, []string{
-		sqlFileS3Key, sqlFileS3KeyVar,
-	})
+		sqlFileS3Bucket = os.Getenv(sqlFileS3BucketVar)
+		validate = append(validate, []string{
+			sqlFileS3Bucket, sqlFileS3BucketVar,
+		})
 
-	iamProfile := os.Getenv(iamProfileVar)
-	validate = append(validate, []string{
-		iamProfile, iamProfileVar,
-	})
+		iamProfile := os.Getenv(iamProfileVar)
+		validate = append(validate, []string{
+			iamProfile, iamProfileVar,
+		})
+	}
 
 	for _, validatePair := range validate {
 		if validatePair[0] == "" {
 			log.Fatalf("%s cannot be blank", validatePair[1])
+		}
+	}
+
+	if sqlFilePath == "" {
+		var err error
+		sqlFilePath, err = s3.GetObj(sqlFileS3Bucket, sqlFileS3Key, iamProfile)
+		if err != nil {
+			log.Fatalf("could not pull SQL file from s3: %s", err)
 		}
 	}
 

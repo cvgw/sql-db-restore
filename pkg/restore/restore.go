@@ -11,6 +11,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// RestoreSQLFile restores a database from a sqlfile by executing each of the DML
+// sequentially
 func RestoreSQLFile(db *sql.DB, sqlFile string) {
 	pathSplit := strings.Split(sqlFile, "/")
 	sqlDirectory := strings.Join(pathSplit[:len(pathSplit)-1], "/")

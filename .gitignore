@@ -1,3 +1,4 @@
 sql-db-restore
 .envrc
 .terraform
+s3_sql_out.sql

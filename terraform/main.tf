@@ -2,10 +2,11 @@ variable "region" {}
 variable "owner" {}
 variable "identifier" {}
 variable "environment" {}
+variable "allowed_account_ids" { type = "list" }
 
 provider "aws" {
   region	      = "${var.region}"
-  allowed_account_ids = ["724781030999"]
+  allowed_account_ids = "${var.allowed_account_ids}"
 }
 
 resource "aws_s3_bucket" "sql-files" {
